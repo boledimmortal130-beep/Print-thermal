@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Printer Thermal Web - Full Feature</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --border: #334155;
+    --thermal-bg: #fefce8;
+    --thermal-text: #1c1917;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s;
+  }
+
+  .container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .sidebar h2 {
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section {
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child {
+    border-bottom: none;
+  }
+
+  .section-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    color: #cbd5e1;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #0f172a;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary);
+  }
+
+  textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .row > * {
+    flex: 1;
+  }
+
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  /* Toggle Switch */
+  .switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #475569;
+    border-radius: 26px;
+    transition: 0.3s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+
+  input:checked + .slider {
+    background: var(--primary);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+  }
+
+  .btn-success {
+    background: #16a34a;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #15803d;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn-outline:hover {
+    background: #334155;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .btn-group .btn {
+    flex: 1;
+  }
+
+  /* Color picker */
+  input[type="color"] {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+  }
+
+  /* ===== PREVIEW AREA ===== */
+  .preview-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .preview-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .preview-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .paper-width-select {
+    display: flex;
+    gap: 8px;
+  }
+
+  .paper-width-select button {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .paper-width-select button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+
+  /* Thermal Paper Simulation */
+  .thermal-wrapper {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+
+  .thermal-paper {
+    width: 320px; /* default 58mm */
+    min-height: 400px;
+    background: var(--thermal-bg);
+    color: var(--thermal-text);
+    padding: 18px 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    position: relative;
+    box-shadow: 
+      0 0 0 1px #d6d3d1,
+      4px 4px 0 #a8a29e,
+      8px 8px 20px rgba(0,0,0,0.25);
+    overflow: hidden;
+  }
+
+  .thermal-paper.wide {
+    width: 420px; /* 80mm */
+  }
+
+  /* Paper texture effect */
+  .thermal-paper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.015) 2px,
+      rgba(0,0,0,0.015) 4px
+    );
+    pointer-events: none;
+  }
+
+  .preview-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .preview-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+
+  .preview-time {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+  }
+
+  .preview-notes {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .preview-char {
+    display: inline-block;
+  }
+
+  .align-left { text-align: left; }
+  .align-center { text-align: center; }
+  .align-right { text-align: right; }
+
+  .status-bar {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .status-connected {
+    color: #4ade80;
+  }
+
+  /* Print styles */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .thermal-paper, .thermal-paper * {
+      visibility: visible;
+    }
+    .thermal-wrapper {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: none;
+      padding: 0;
+      box-shadow: none;
+      border: none;
+    }
+    .thermal-paper {
+      box-shadow: none;
+      width: 58mm !important;
+      max-width: 58mm;
+    }
+    .thermal-paper.wide {
+      width: 80mm !important;
+      max-width: 80mm;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- ===== SIDEBAR SETTINGS ===== -->
+    <div class="sidebar">
+      <h2>🖨️ Pengaturan Thermal</h2>
+
+      <!-- Bluetooth -->
+      <div class="section">
+        <div class="section-title">Koneksi Bluetooth</div>
+        <button class="btn btn-primary" id="btnBluetooth" onclick="connectBluetooth()">
+          📡 Hubungkan Bluetooth
+        </button>
+        <div class="status-bar" id="btStatus">Belum terhubung</div>
+      </div>
+
+      <!-- Judul / Nama -->
+      <div class="section">
+        <div class="toggle-row">
+          <div class="section-title" style="margin:0">Nama / Judul</div>
+          <label class="switch">
+            <input type="checkbox" id="toggleTitle" checked onchange="updatePreview()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <input type="text" id="inputTitle" placeholder="Contoh: Toko Maju Jaya" value="TOKO MAJU JAYA" oninput="updatePreview()">
+        
+        <div style="margin-top:10px">
+          <label>Posisi</label>
+          <select id="alignTitle" onchange="updatePreview()">
+            <option value="center">Tengah</option>
+            <option value="left">Kiri</option>
+            <option value="right">Kanan</option>
+          </select>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Ukuran Font</label>
+            <input type="number" id="sizeTitle" value="16" min="10" max="32" oninput="updatePreview()">
+          </div>
+          <div>
+            <label>Gaya</label>
+            <select id="styleTitle" onchange="updatePreview()">
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+              <option value="italic">Italic</option>
+              <option value="bold italic">Bold Italic</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waktu -->
+      <div class="section">
+        <div class="toggle-row">
+          <div class="section-title" style="margin:0">Waktu & Tanggal</div>
+          <label class="switch">
+            <input type="checkbox" id="toggleTime" checked onchange="updatePreview()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div>
+          <label>Format</label>
+          <select id="formatTime" onchange="updatePreview()">
+            <option value="full">Hari, DD Bulan YYYY • HH:MM</option>
+            <option value="short">DD/MM/YYYY HH:MM</option>
+            <option value="date">Hanya Tanggal</option>
+            <option value="time">Hanya Jam</option>
+          </select>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Posisi</label>
+          <select id="alignTime" onchange="updatePreview()">
+            <option value="center">Tengah</option>
+            <option value="left">Kiri</option>
+            <option value="right">Kanan</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Catatan -->
+      <div class="section">
+        <div class="section-title">Catatan / Isi Cetakan</div>
+        <textarea id="inputNotes" placeholder="Tulis catatan yang akan dicetak di sini..." oninput="updatePreview()">Terima kasih telah berbelanja!
+Semoga harimu menyenangkan.
+
+Barang yang sudah dibeli tidak dapat ditukar.</textarea>
+
+        <div style="margin-top:10px">
+          <label>Posisi Catatan</label>
+          <select id="alignNotes" onchange="updatePreview()">
+            <option value="left">Kiri</option>
+            <option value="center">Tengah</option>
+            <option value="right">Kanan</option>
+          </select>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Ukuran Font</label>
+            <input type="number" id="sizeNotes" value="13" min="10" max="22" oninput="updatePreview()">
+          </div>
+          <div>
+            <label>Gaya</label>
+            <select id="styleNotes" onchange="updatePreview()">
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+              <option value="italic">Italic</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Karakter Tambahan -->
+      <div class="section">
+        <div class="section-title">Karakter / Simbol Extra</div>
+        <input type="text" id="inputChar" placeholder="Contoh: ★ ★ ★  atau  ====" value="★ ★ ★ ★ ★" oninput="updatePreview()">
+        
+        <div style="margin-top:10px">
+          <label>Posisi Karakter</label>
+          <select id="alignChar" onchange="updatePreview()">
+            <option value="center">Tengah</option>
+            <option value="left">Kiri</option>
+            <option value="right">Kanan</option>
+          </select>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Ukuran</label>
+            <input type="number" id="sizeChar" value="14" min="10" max="28" oninput="updatePreview()">
+          </div>
+          <div>
+            <label>Posisi Vertikal</label>
+            <select id="posChar" onchange="updatePreview()">
+              <option value="top">Atas (setelah judul)</option>
+              <option value="middle">Tengah (setelah waktu)</option>
+              <option value="bottom">Bawah (setelah catatan)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background Website -->
+      <div class="section">
+        <div class="section-title">Background Website</div>
+        <label>Warna Dasar</label>
+        <input type="color" id="bgColor" value="#0f172a" oninput="changeBackground()">
+        
+        <label style="margin-top:10px">Gradasi (opsional)</label>
+        <select id="bgGradient" onchange="changeBackground()">
+          <option value="none">Tanpa Gradasi</option>
+          <option value="dark">Gelap (Default)</option>
+          <option value="blue">Biru Tua</option>
+          <option value="purple">Ungu</option>
+          <option value="green">Hijau Tua</option>
+          <option value="sunset">Sunset</option>
+        </select>
+      </div>
+
+      <!-- Tombol Aksi -->
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="printThermal()">🖨️ Cetak</button>
+        <button class="btn btn-outline" onclick="resetAll()">Reset</button>
+      </div>
+    </div>
+
+    <!-- ===== PREVIEW ===== -->
+    <div class="preview-area">
+      <div class="preview-header">
+        <h1>Preview Kertas Thermal</h1>
+        <div class="paper-width-select">
+          <button class="active" id="btn58" onclick="setPaperWidth(58)">58mm</button>
+          <button id="btn80" onclick="setPaperWidth(80)">80mm</button>
+        </div>
+      </div>
+
+      <div class="thermal-wrapper">
+        <div class="thermal-paper" id="thermalPaper">
+          <div class="preview-content" id="previewContent">
+            <!-- Diisi oleh JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        Preview akan otomatis update saat Anda mengubah pengaturan
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ===== Global State =====
+  let bluetoothDevice = null;
+  let paperWidth = 58; // mm
+
+  // ===== Update Preview =====
+  function updatePreview() {
+    const content = document.getElementById('previewContent');
+    let html = '';
+
+    // Title
+    const showTitle = document.getElementById('toggleTitle').checked;
+    if (showTitle) {
+      const title = document.getElementById('inputTitle').value || '';
+      const align = document.getElementById('alignTitle').value;
+      const size = document.getElementById('sizeTitle').value;
+      const style = document.getElementById('styleTitle').value;
+      
+      html += `<div class="preview-title align-\( {align}" style="font-size: \){size}px; font-weight:\( {style.includes('bold') ? 'bold' : 'normal'}; font-style: \){style.includes('italic') ? 'italic' : 'normal'}">${escapeHtml(title)}</div>`;
+    }
+
+    // Character (top)
+    const charPos = document.getElementById('posChar').value;
+    const charText = document.getElementById('inputChar').value;
+    if (charText && charPos === 'top') {
+      html += renderChar();
+    }
+
+    // Time
+    const showTime = document.getElementById('toggleTime').checked;
+    if (showTime) {
+      const align = document.getElementById('alignTime').value;
+      const format = document.getElementById('formatTime').value;
+      html += `<div class="preview-time align-\( {align}"> \){getFormattedTime(format)}</div>`;
+    }
+
+    // Character (middle)
+    if (charText && charPos === 'middle') {
+      html += renderChar();
+    }
+
+    // Notes
+    const notes = document.getElementById('inputNotes').value || '';
+    const alignNotes = document.getElementById('alignNotes').value;
+    const sizeNotes = document.getElementById('sizeNotes').value;
+    const styleNotes = document.getElementById('styleNotes').value;
+
+    html += `<div class="preview-notes align-\( {alignNotes}" style="font-size: \){sizeNotes}px; font-weight:\( {styleNotes.includes('bold') ? 'bold' : 'normal'}; font-style: \){styleNotes.includes('italic') ? 'italic' : 'normal'}">${escapeHtml(notes)}</div>`;
+
+    // Character (bottom)
+    if (charText && charPos === 'bottom') {
+      html += renderChar();
+    }
+
+    content.innerHTML = html;
+  }
+
+  function renderChar() {
+    const text = document.getElementById('inputChar').value;
+    const align = document.getElementById('alignChar').value;
+    const size = document.getElementById('sizeChar').value;
+    return `<div class="preview-char align-\( {align}" style="font-size: \){size}px; margin: 8px 0;">${escapeHtml(text)}</div>`;
+  }
+
+  function getFormattedTime(format) {
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    const d = String(now.getDate()).padStart(2,'0');
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    const y = now.getFullYear();
+    const h = String(now.getHours()).padStart(2,'0');
+    const min = String(now.getMinutes()).padStart(2,'0');
+
+    switch(format) {
+      case 'full':
+        return `${hari[now.getDay()]}, ${d} ${bulan[now.getMonth()]} ${y} • \( {h}: \){min}`;
+      case 'short':
+        return `\( {d}/ \){m}/${y} \( {h}: \){min}`;
+      case 'date':
+        return `${d} ${bulan[now.getMonth()]} ${y}`;
+      case 'time':
+        return `\( {h}: \){min}`;
+      default:
+        return `\( {d}/ \){m}/${y} \( {h}: \){min}`;
+    }
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+      .replace(/\n/g, '<br>');
+  }
+
+  // ===== Paper Width =====
+  function setPaperWidth(mm) {
+    paperWidth = mm;
+    const paper = document.getElementById('thermalPaper');
+    document.getElementById('btn58').classList.toggle('active', mm === 58);
+    document.getElementById('btn80').classList.toggle('active', mm === 80);
+    
+    if (mm === 80) {
+      paper.classList.add('wide');
+    } else {
+      paper.classList.remove('wide');
+    }
+  }
+
+  // ===== Background =====
+  function changeBackground() {
+    const color = document.getElementById('bgColor').value;
+    const gradient = document.getElementById('bgGradient').value;
+
+    let bg = color;
+    switch(gradient) {
+      case 'dark':
+        bg = `linear-gradient(135deg, #0f172a 0%, #1e293b 100%)`;
+        break;
+      case 'blue':
+        bg = `linear-gradient(135deg, #0c4a6e 0%, #1e3a5f 50%, #0f172a 100%)`;
+        break;
+      case 'purple':
+        bg = `linear-gradient(135deg, #4c1d95 0%, #2e1065 50%, #0f172a 100%)`;
+        break;
+      case 'green':
+        bg = `linear-gradient(135deg, #064e3b 0%, #022c22 50%, #0f172a 100%)`;
+        break;
+      case 'sunset':
+        bg = `linear-gradient(135deg, #7c2d12 0%, #9a3412 30%, #1e1b4b 100%)`;
+        break;
+      default:
+        bg = color;
+    }
+    document.body.style.background = bg;
+  }
+
+  // ===== Bluetooth =====
+  async function connectBluetooth() {
+    const status = document.getElementById('btStatus');
+    const btn = document.getElementById('btnBluetooth');
+
+    if (!navigator.bluetooth) {
+      alert('Browser Anda tidak mendukung Web Bluetooth.\nGunakan Chrome/Edge di Android atau Desktop.');
+      return;
+    }
+
+    try {
+      status.textContent = 'Mencari perangkat...';
+      btn.disabled = true;
+
+      bluetoothDevice = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [
+          '000018f0-0000-1000-8000-00805f9b34fb', // common thermal
+          '0000ff00-0000-1000-8000-00805f9b34fb',
+          '0000ffe0-0000-1000-8000-00805f9b34fb'
+        ]
+      });
+
+      status.innerHTML = `<span class="status-connected">✓ Terhubung: ${bluetoothDevice.name || 'Printer'}</span>`;
+      btn.textContent = '🔗 Terhubung';
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-success');
+
+      bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+        status.textContent = 'Terputus';
+        btn.textContent = '📡 Hubungkan Bluetooth';
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-success');
+        bluetoothDevice = null;
+      });
+
+    } catch (err) {
+      console.error(err);
+      status.textContent = 'Gagal / Dibatalkan';
+      btn.disabled = false;
+    }
+  }
+
+  // ===== Print =====
+  function printThermal() {
+    // Update preview dulu
+    updatePreview();
+    
+    // Set paper size via CSS
+    const paper = document.getElementById('thermalPaper');
+    if (paperWidth === 80) {
+      paper.classList.add('wide');
+    } else {
+      paper.classList.remove('wide');
+    }
+
+    window.print();
+  }
+
+  // ===== Reset =====
+  function resetAll() {
+    document.getElementById('inputTitle').value = 'TOKO MAJU JAYA';
+    document.getElementById('toggleTitle').checked = true;
+    document.getElementById('alignTitle').value = 'center';
+    document.getElementById('sizeTitle').value = 16;
+    document.getElementById('styleTitle').value = 'bold';
+
+    document.getElementById('toggleTime').checked = true;
+    document.getElementById('formatTime').value = 'full';
+    document.getElementById('alignTime').value = 'center';
+
+    document.getElementById('inputNotes').value = 'Terima kasih telah berbelanja!\nSemoga harimu menyenangkan.\n\nBarang yang sudah dibeli tidak dapat ditukar.';
+    document.getElementById('alignNotes').value = 'left';
+    document.getElementById('sizeNotes').value = 13;
+    document.getElementById('styleNotes').value = 'normal';
+
+    document.getElementById('inputChar').value = '★ ★ ★ ★ ★';
+    document.getElementById('alignChar').value = 'center';
+    document.getElementById('sizeChar').value = 14;
+    document.getElementById('posChar').value = 'top';
+
+    document.getElementById('bgColor').value = '#0f172a';
+    document.getElementById('bgGradient').value = 'dark';
+    changeBackground();
+
+    setPaperWidth(58);
+    updatePreview();
+  }
+
+  // ===== Init =====
+  updatePreview();
+  changeBackground();
+
+  // Update waktu setiap menit
+  setInterval(updatePreview, 30000);
+</script>
+</body>
+</html>
